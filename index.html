@@ -11,6 +11,8 @@
         .progress-orange { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
         .tab-content { display: none; }
         .active { display: block; }
+        #chat-window::-webkit-scrollbar { width: 4px; }
+        #chat-window::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
 <body class="font-sans">
@@ -22,60 +24,59 @@
                 <h1 class="text-2xl font-black tracking-tighter text-orange-500">SimpleX</h1>
                 <div class="text-right">
                     <p id="user-level" class="text-xs uppercase font-bold text-slate-400">Уровень 1</p>
-                    <p id="user-xp" class="text-sm font-mono">0 / 100 XP</p>
+                    <p id="user-xp" class="text-sm font-mono text-orange-300">0 / 100 XP</p>
                 </div>
             </div>
             <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                <div id="xp-bar" class="progress-orange h-full" style="width: 0%"></div>
+                <div id="xp-bar" class="progress-orange h-full transition-all duration-500" style="width: 0%"></div>
             </div>
         </header>
 
         <main id="tab-lessons" class="tab-content active px-6">
             <h2 class="text-xl font-bold mb-4">Твои уроки</h2>
             <div class="space-y-4">
-                <div class="glass p-5 rounded-2xl flex justify-between items-center">
+                <div class="glass p-5 rounded-2xl flex justify-between items-center border-l-4 border-orange-500">
                     <div>
                         <h3 class="font-bold">First Steps</h3>
                         <p class="text-xs text-slate-400">Базовые фразы и приветствия</p>
                     </div>
-                    <button class="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-xl text-sm font-bold">Начать</button>
+                    <button class="bg-orange-500 p-2 rounded-lg">🔥</button>
                 </div>
-                <div class="glass p-5 rounded-2xl flex justify-between items-center opacity-50">
+                <div class="glass p-5 rounded-2xl flex justify-between items-center opacity-40">
                     <div>
                         <h3 class="font-bold">Daily Life</h3>
-                        <p class="text-xs text-slate-400">Заблокировано (нужен Lvl 2)</p>
+                        <p class="text-xs text-slate-400">Нужен Уровень 2</p>
                     </div>
-                    <span class="text-xl">🔒</span>
+                    <span>🔒</span>
                 </div>
             </div>
         </main>
 
-        <main id="tab-chat" class="tab-content px-6 flex-1 flex flex-col">
-            <div id="chat-window" class="flex-1 overflow-y-auto space-y-4 mb-4 pr-2 text-sm">
-                <div class="glass p-3 rounded-2xl rounded-tl-none max-w-[85%]">
+        <main id="tab-chat" class="tab-content px-6 flex-1 flex flex-col h-[60vh]">
+            <div id="chat-window" class="flex-1 overflow-y-auto space-y-4 mb-4 pr-2 text-sm flex flex-col">
+                <div class="glass p-3 rounded-2xl rounded-tl-none max-w-[85%] border border-slate-700">
                     Hi! I'm your SimpleX tutor. Write something in English to earn XP! 🚀
                 </div>
             </div>
-            <div class="flex gap-2 mb-20">
-                <input id="chat-input" type="text" placeholder="Type here..." class="flex-1 bg-slate-800 border-none rounded-xl p-4 text-white outline-none focus:ring-2 focus:ring-orange-500">
-                <button onclick="handleSend()" class="bg-orange-500 p-4 rounded-xl font-bold">></button>
+            <div class="flex gap-2 mb-24">
+                <input id="chat-input" type="text" placeholder="Write in English..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl p-4 text-white outline-none focus:ring-2 focus:ring-orange-500">
+                <button onclick="handleSend()" class="bg-orange-500 px-5 rounded-xl font-bold shadow-lg shadow-orange-900/20">></button>
             </div>
         </main>
 
-        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass border-t-0 rounded-t-3xl p-4 flex justify-around">
-            <button onclick="switchTab('tab-lessons')" class="flex flex-col items-center">
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass border-t border-white/10 rounded-t-3xl p-4 flex justify-around">
+            <button onclick="switchTab('tab-lessons')" class="flex flex-col items-center focus:text-orange-500">
                 <span class="text-xl">📚</span>
                 <span class="text-[10px] uppercase mt-1">Уроки</span>
             </button>
-            <button onclick="switchTab('tab-chat')" class="flex flex-col items-center">
+            <button onclick="switchTab('tab-chat')" class="flex flex-col items-center focus:text-orange-500">
                 <span class="text-xl">🤖</span>
-                <span class="text-[10px] uppercase mt-1">ИИ Чат</span>
+                <span class="text-[10px] uppercase mt-1">Чат</span>
             </button>
         </nav>
     </div>
 
     <script>
-        // ЛОГИКА ПРОГРЕССА
         let xp = parseInt(localStorage.getItem('simplex_xp')) || 0;
         let level = Math.floor(xp / 100) + 1;
 
@@ -87,37 +88,59 @@
             localStorage.setItem('simplex_xp', xp);
         }
 
-        // ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
         }
 
-        // РАБОТА ЧАТА
-        function handleSend() {
+        async function handleSend() {
             const input = document.getElementById('chat-input');
             const chatWin = document.getElementById('chat-window');
-            if (!input.value) return;
-
-            // Добавляем сообщение юзера
-            chatWin.innerHTML += `<div class="bg-orange-500 p-3 rounded-2xl rounded-tr-none max-w-[85%] self-end ml-auto">${input.value}</div>`;
+            const userText = input.value.trim();
+            const token = "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";
             
+            if (!userText) return;
+
+            // Сообщение пользователя
+            chatWin.innerHTML += `<div class="bg-orange-600 p-3 rounded-2xl rounded-tr-none max-w-[85%] self-end ml-auto shadow-md">${userText}</div>`;
+            input.value = '';
+            chatWin.scrollTop = chatWin.scrollHeight;
+
             // Начисляем XP
             xp += 20;
             level = Math.floor(xp / 100) + 1;
             updateStats();
 
-            // Ответ (заглушка)
-            setTimeout(() => {
-                chatWin.innerHTML += `<div class="glass p-3 rounded-2xl rounded-tl-none max-w-[85%]">Good job! +20 XP earned. Keep going!</div>`;
-                chatWin.scrollTop = chatWin.scrollHeight;
-            }, 600);
+            // Индикатор загрузки
+            const typingId = "typing-" + Date.now();
+            chatWin.innerHTML += `<div id="${typingId}" class="glass p-3 rounded-2xl rounded-tl-none max-w-[85%] animate-pulse text-slate-400 italic">Thinking...</div>`;
+            chatWin.scrollTop = chatWin.scrollHeight;
 
-            input.value = '';
+            try {
+                const response = await fetch("https://api-inference.huggingface.co/models/Mistralai/Mistral-7B-Instruct-v0.2", {
+                    headers: { Authorization: `Bearer ${token}` },
+                    method: "POST",
+                    body: JSON.stringify({ 
+                        inputs: `<s>[INST] You are a friendly English teacher in the app SimpleX. Reply briefly to this student: "${userText}" [/INST]`,
+                        parameters: { max_new_tokens: 100 }
+                    }),
+                });
+                
+                const data = await response.json();
+                document.getElementById(typingId).remove();
+                
+                let rawOutput = data[0].generated_text;
+                let aiText = rawOutput.split('[/INST]').pop().trim();
+
+                chatWin.innerHTML += `<div class="glass p-3 rounded-2xl rounded-tl-none max-w-[85%] border border-slate-700">${aiText}</div>`;
+            } catch (error) {
+                document.getElementById(typingId).innerHTML = "I'm a bit tired today. But your XP is safe! Let's try again?";
+            }
+            
             chatWin.scrollTop = chatWin.scrollHeight;
         }
 
-        updateStats(); // Инициализация при запуске
+        updateStats();
     </script>
 </body>
 </html>
