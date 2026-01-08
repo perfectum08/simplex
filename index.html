@@ -1,197 +1,192 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SimpleX Pro - Stats & AI</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
-body { background: #05070a; color: #f1f5f9; font-family: 'Plus Jakarta Sans', sans-serif; }
-.tab-content { display: none; }
-.active { display: block; }
-.glass { background: #11141b; border: 1px solid #1f242d; border-radius: 24px; }
-.btn-blue { background: #3b82f6; box-shadow: 0 10px 20px -10px rgba(59, 130, 246, 0.5); }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleX B2 - Core English</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap');
+        body { background: #080a0c; color: #f1f5f9; font-family: 'Manrope', sans-serif; }
+        .tab-content { display: none; }
+        .active { display: block; }
+        .glass { background: #12161b; border: 1px solid #232a35; border-radius: 20px; }
+        .btn-action { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.2s; }
+        .btn-action:active { transform: scale(0.96); opacity: 0.9; }
+    </style>
 </head>
-<body class="p-5 flex flex-col min-h-screen">
+<body class="p-4 flex flex-col min-h-screen max-w-md mx-auto">
 
-<div class="flex justify-between items-center mb-8">
-    <h1 class="text-xl font-extrabold tracking-tighter text-blue-500">SimpleX</h1>
-    <div class="flex gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-        <div class="flex flex-col items-end"><span>Ошибок</span><span id="st-err-top" class="text-red-500 text-sm italic">0</span></div>
-        <div class="flex flex-col items-end"><span>Слов</span><span id="st-words-top" class="text-green-500 text-sm italic">0</span></div>
-    </div>
-</div>
-
-<div class="flex-1">
-    <section id="tab-learn" class="tab-content active">
-        <div class="glass p-6 mb-6">
-            <p class="text-gray-500 text-[10px] uppercase font-bold mb-3 tracking-widest">Переведи фразу:</p>
-            <h2 id="task-ru" class="text-lg font-bold mb-6 text-blue-50">...</h2>
-            <div id="drop-zone" class="min-h-[50px] border-b border-gray-800 mb-8 flex flex-wrap gap-2 pb-3"></div>
-            <div id="word-bank" class="flex flex-wrap gap-2"></div>
+    <header class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-xl font-black text-blue-500 tracking-tighter">SimpleX <span class="text-[10px] bg-blue-500/20 px-2 py-0.5 rounded text-blue-400">B2 READY</span></h1>
         </div>
-        <button onclick="checkTask()" class="w-full py-4 btn-blue rounded-2xl font-bold active:scale-95 transition-all">Проверить</button>
-    </section>
-
-    <section id="tab-chat" class="tab-content flex flex-col h-[65vh]">
-        <div id="ai-setup" class="mb-4">
-            <input id="ai-token-input" type="password" placeholder="Вставь свой токен HF сюда..." class="w-full bg-gray-900 border border-gray-800 p-3 rounded-xl text-xs outline-none">
-            <button onclick="saveToken()" class="mt-2 text-[10px] text-blue-500 uppercase font-bold">Сохранить токен</button>
+        <div class="flex gap-3 text-[10px] font-bold uppercase text-gray-500">
+            <div class="text-right">Ошибки: <span id="top-err" class="text-red-500 block text-sm">0</span></div>
+            <div class="text-right">Слова: <span id="top-words" class="text-green-500 block text-sm">0</span></div>
         </div>
-        <div id="chat-win" class="flex-1 overflow-y-auto space-y-4 mb-4 text-sm scroll-smooth pr-2"></div>
-        <div class="flex gap-2 mb-20">
-            <input id="chat-in" type="text" placeholder="Напиши учителю..." class="flex-1 bg-gray-900 border border-gray-800 rounded-2xl p-4 outline-none focus:border-blue-500">
-            <button onclick="sendAI()" class="btn-blue px-6 rounded-2xl font-bold">></button>
-        </div>
-    </section>
+    </header>
 
-    <section id="tab-stats" class="tab-content">
-        <h2 class="text-xl font-bold mb-6 italic text-blue-500">Progress Report</h2>
-        <div class="grid grid-cols-2 gap-4 mb-8">
-            <div class="glass p-5"><p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Learned</p><p id="st-learned" class="text-2xl font-black">0</p></div>
-            <div class="glass p-5"><p class="text-[10px] text-gray-500 uppercase font-bold mb-1 text-red-500">Mistakes</p><p id="st-errors" class="text-2xl font-black text-red-500">0</p></div>
-        </div>
-        <div class="glass p-5">
-            <h3 class="text-xs font-bold mb-4 border-b border-gray-800 pb-2 uppercase text-gray-400">Journal (Last 5 errors):</h3>
-            <div id="error-log" class="space-y-3 text-[11px]"></div>
-        </div>
-        <button onclick="localStorage.removeItem('simplex_v3_stats'); location.reload();" class="mt-10 text-[9px] text-red-900 uppercase font-bold tracking-widest">Сбросить всю статистику</button>
-    </section>
-</div>
+    <main class="flex-1">
+        <section id="tab-learn" class="tab-content active">
+            <div id="module-selector" class="mb-6 overflow-x-auto flex gap-2 pb-2 no-scrollbar">
+                <button onclick="loadLevel('A1')" class="px-4 py-2 glass text-[10px] font-bold uppercase whitespace-nowrap border-blue-500/30">A1: Основы</button>
+                <button onclick="loadLevel('A2')" class="px-4 py-2 glass text-[10px] font-bold uppercase whitespace-nowrap">A2: Быт</button>
+                <button onclick="loadLevel('B1')" class="px-4 py-2 glass text-[10px] font-bold uppercase whitespace-nowrap">B1: Свобода</button>
+                <button onclick="loadLevel('B2')" class="px-4 py-2 glass text-[10px] font-bold uppercase whitespace-nowrap">B2: Профи</button>
+            </div>
 
-<nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-black/90 backdrop-blur-lg border-t border-gray-900 p-5 flex justify-around rounded-t-[40px]">
-    <button onclick="switchTab('tab-learn')" class="opacity-50 hover:opacity-100 transition-opacity">🧩</button>
-    <button onclick="switchTab('tab-chat')" class="opacity-50 hover:opacity-100 transition-opacity">🤖</button>
-    <button onclick="switchTab('tab-stats')" class="opacity-50 hover:opacity-100 transition-opacity">📊</button>
-</nav>
+            <div class="glass p-6 mb-4 relative overflow-hidden">
+                <div id="level-indicator" class="absolute top-0 right-0 bg-blue-600 px-3 py-1 text-[8px] font-black rounded-bl-xl">A1</div>
+                <p class="text-gray-500 text-[10px] uppercase font-bold mb-2">Переведи предложение:</p>
+                <h2 id="q-ru" class="text-lg font-bold mb-6">Загрузка...</h2>
+                <div id="build-area" class="min-h-[60px] border-b border-gray-800 mb-6 flex flex-wrap gap-2 pb-2"></div>
+                <div id="options" class="flex flex-wrap gap-2"></div>
+            </div>
+            <button onclick="checkAnswer()" class="w-full py-4 btn-action rounded-2xl font-bold text-sm shadow-lg shadow-blue-500/20">Проверить ответ</button>
+        </section>
 
-<script>
-let stats = JSON.parse(localStorage.getItem('simplex_v3_stats')) || { learned: [], errors: [], errorCount: 0 };
-let hfToken = localStorage.getItem('hf_user_token') || "";
+        <section id="tab-stats" class="tab-content">
+            <h2 class="text-xl font-bold mb-4">Твой прогресс</h2>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="glass p-4"><p class="text-[10px] text-gray-500 uppercase font-bold mb-1 italic">Изучено фраз</p><p id="count-learned" class="text-3xl font-black">0</p></div>
+                <div class="glass p-4"><p class="text-[10px] text-gray-500 uppercase font-bold mb-1 italic text-red-500">Всего ошибок</p><p id="count-errors" class="text-3xl font-black text-red-500">0</p></div>
+            </div>
+            <div class="glass p-5">
+                <h3 class="text-xs font-bold mb-4 border-b border-gray-800 pb-2 uppercase text-gray-400 tracking-widest">Журнал работы над ошибками:</h3>
+                <div id="error-log" class="space-y-4 text-[11px]">
+                    <p class="text-gray-600 italic">Здесь будут появляться фразы, в которых вы ошиблись...</p>
+                </div>
+            </div>
+            <button onclick="resetStats()" class="mt-8 text-[9px] text-gray-700 uppercase font-bold hover:text-red-500 transition-colors">Сбросить весь прогресс</button>
+        </section>
+    </main>
 
-const db = {
-    tasks: [
-        {ru: "Я учу английский", en: ["I", "learn", "English"]},
-        {ru: "Мне нравится это приложение", en: ["I", "like", "this", "app"]},
-        {ru: "Ты мой учитель", en: ["You", "are", "my", "teacher"]}
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-black/90 backdrop-blur-md border-t border-gray-900 p-5 flex justify-around rounded-t-[35px]">
+        <button onclick="switchTab('tab-learn')" class="text-xl filter grayscale hover:grayscale-0 transition-all">🧩</button>
+        <button onclick="switchTab('tab-stats')" class="text-xl filter grayscale hover:grayscale-0 transition-all">📊</button>
+    </nav>
+
+    <script>
+        // БАЗА ЗНАНИЙ B2 (Пример наполнения)
+        const knowledgeBase = {
+    A1: [ // Beginner: Основы, глагол to be, Present Simple
+        {ru: "Я студент", en: ["I", "am", "a", "student"]},
+        {ru: "Она живет в Лондоне", en: ["She", "lives", "in", "London"]},
+        {ru: "У них есть машина", en: ["They", "have", "a", "car"]},
+        {ru: "Вы говорите по-английски?", en: ["Do", "you", "speak", "English?"]},
+        {ru: "Сегодня холодно", en: ["It", "is", "cold", "today"]},
+        {ru: "Я не люблю кофе", en: ["I", "do", "not", "like", "coffee"]}
+    ],
+    A2: [ // Elementary: Past Simple, Future Simple, Comparison
+        {ru: "Мы вчера смотрели фильм", en: ["We", "watched", "a", "movie", "yesterday"]},
+        {ru: "Я позвоню тебе завтра", en: ["I", "will", "call", "you", "tomorrow"]},
+        {ru: "Этот дом больше того", en: ["This", "house", "is", "bigger", "than", "that", "one"]},
+        {ru: "Ты был в Париже?", en: ["Have", "you", "been", "to", "Paris?"]},
+        {ru: "Я умею плавать очень хорошо", en: ["I", "can", "swim", "very", "well"]},
+        {ru: "В холодильнике есть молоко", en: ["There", "is", "some", "milk", "in", "the", "fridge"]}
+    ],
+    B1: [ // Intermediate: Present Perfect, Passive Voice, Conditionals 1 & 2
+        {ru: "Я уже закончил работу", en: ["I", "have", "already", "finished", "the", "work"]},
+        {ru: "Эту книгу написали в 19 веке", en: ["This", "book", "was", "written", "in", "the", "19th", "century"]},
+        {ru: "Если бы я был богат, я бы путешествовал", en: ["If", "I", "were", "rich", "I", "would", "travel"]},
+        {ru: "Мне нужно подстричься", en: ["I", "need", "to", "have", "my", "hair", "cut"]},
+        {ru: "Она сказала, что занята", en: ["She", "said", "that", "she", "was", "busy"]},
+        {ru: "Я привык вставать рано", en: ["I", "am", "used", "to", "getting", "up", "early"]}
+    ],
+    B2: [ // Upper-Intermediate: Modal Verbs in Past, Conditionals 3, Advanced Phrasal Verbs
+        {ru: "Тебе следовало послушать моего совета", en: ["You", "should", "have", "listened", "to", "my", "advice"]},
+        {ru: "Я с нетерпением жду встречи с вами", en: ["I", "am", "looking", "forward", "to", "meeting", "you"]},
+        {ru: "Несмотря на дождь, мы пошли гулять", en: ["Despite", "the", "rain", "we", "went", "for", "a", "walk"]},
+        {ru: "Едва ли я мог что-то сделать", en: ["There", "was", "hardly", "anything", "I", "could", "do"]},
+        {ru: "Если бы ты позвонил, я бы пришел", en: ["If", "you", "had", "called", "I", "would", "have", "come"]},
+        {ru: "Мне пришлось отменить встречу", en: ["I", "had", "to", "call", "off", "the", "meeting"]}
     ]
 };
 
-let cur = 0;
-let build = [];
+        let currentLevel = 'A1';
+        let currentIdx = 0;
+        let userDraft = [];
+        let stats = JSON.parse(localStorage.getItem('simplex_b2_stats')) || { learned: 0, errors: [], totalErrors: 0 };
 
-function saveToken() {
-    const val = document.getElementById('ai-token-input').value.trim();
-    if(val) {
-        localStorage.setItem('hf_user_token', val);
-        hfToken = val;
-        alert("Токен сохранен в памяти телефона!");
-        document.getElementById('ai-setup').classList.add('hidden');
-    }
-}
-
-function save() {
-    localStorage.setItem('simplex_v3_stats', JSON.stringify(stats));
-    document.getElementById('st-err-top').innerText = stats.errorCount;
-    document.getElementById('st-words-top').innerText = stats.learned.length;
-    document.getElementById('st-learned').innerText = stats.learned.length;
-    document.getElementById('st-errors').innerText = stats.errorCount;
-    const log = document.getElementById('error-log');
-    log.innerHTML = stats.errors.slice(-5).reverse().map(e => `
-        <div class="border-l-2 border-red-500 pl-3">
-            <div class="text-red-400 font-bold">Твой ответ: ${e.w}</div>
-            <div class="text-green-400">Верно: ${e.c}</div>
-        </div>
-    `).join('');
-}
-
-function switchTab(id) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    if(id === 'tab-chat' && !hfToken) document.getElementById('ai-setup').classList.remove('hidden');
-}
-
-function initTask() {
-    const t = db.tasks[cur];
-    document.getElementById('task-ru').innerText = t.ru;
-    const bank = document.getElementById('word-bank');
-    bank.innerHTML = t.en.sort(() => Math.random() - 0.5)
-        .map(w => `<button onclick="pick('${w}', this)" class="bg-gray-800 px-4 py-2 rounded-xl border border-gray-700 font-bold">${w}</button>`).join('');
-    document.getElementById('drop-zone').innerHTML = '';
-    build = [];
-}
-
-function pick(w, btn) {
-    build.push(w);
-    btn.style.visibility = 'hidden';
-    document.getElementById('drop-zone').innerHTML += `<span class="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-lg border border-blue-500/30 m-1">${w}</span>`;
-}
-
-function checkTask() {
-    const cor = db.tasks[cur].en.join(' ');
-    const usr = build.join(' ');
-    if (usr === cor) {
-        if(!stats.learned.includes(cor)) stats.learned.push(cor);
-        cur = (cur + 1) % db.tasks.length;
-        initTask();
-    } else {
-        stats.errorCount++;
-        stats.errors.push({w: usr || "пусто", c: cor});
-        initTask();
-    }
-    save();
-}
-
-// ===== Исправленный sendAI =====
-async function sendAI() {
-    if(!hfToken) { alert("Сначала введи токен во вкладке чата!"); return; }
-
-    const inputEl = document.getElementById('chat-in');
-    const chatWin = document.getElementById('chat-win');
-    const msg = inputEl.value.trim();
-    if(!msg) return;
-
-    chatWin.innerHTML += `<div class="bg-blue-600 p-4 rounded-3xl rounded-tr-none ml-auto max-w-[85%] text-white shadow-lg">${msg}</div>`;
-    inputEl.value = '';
-    chatWin.scrollTop = chatWin.scrollHeight;
-
-    const tid = "t-"+Date.now();
-    chatWin.innerHTML += `<div id="${tid}" class="glass p-4 rounded-3xl rounded-tl-none mr-auto max-w-[85%] italic text-gray-500 animate-pulse text-xs">Учитель подбирает слова...</div>`;
-    chatWin.scrollTop = chatWin.scrollHeight;
-
-    try {
-        const res = await fetch("https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct", {
-            method: "POST",
-            headers: { "Authorization": "Bearer " + hfToken, "Content-Type": "application/json" },
-            body: JSON.stringify({ inputs: msg })
-        });
-
-        if(!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-        const data = await res.json();
-        document.getElementById(tid).remove();
-
-        let txt = "";
-        if(Array.isArray(data) && data[0]?.generated_text) {
-            txt = data[0].generated_text;
-        } else if(data.generated_text) {
-            txt = data.generated_text;
-        } else {
-            txt = "Ошибка ответа API";
+        function save() {
+            localStorage.setItem('simplex_b2_stats', JSON.stringify(stats));
+            document.getElementById('top-err').innerText = stats.totalErrors;
+            document.getElementById('top-words').innerText = stats.learned;
+            document.getElementById('count-learned').innerText = stats.learned;
+            document.getElementById('count-errors').innerText = stats.totalErrors;
+            
+            const log = document.getElementById('error-log');
+            if(stats.errors.length > 0) {
+                log.innerHTML = stats.errors.slice(-4).reverse().map(e => `
+                    <div class="border-l-2 border-red-500 pl-3">
+                        <div class="text-red-400 font-bold mb-1">Ошибка: ${e.wrong}</div>
+                        <div class="text-green-500">Верно: ${e.correct}</div>
+                    </div>
+                `).join('');
+            }
         }
 
-        chatWin.innerHTML += `<div class="glass p-4 rounded-3xl rounded-tl-none mr-auto max-w-[85%] border-l-4 border-blue-500 shadow-sm">${txt}</div>`;
-        chatWin.scrollTop = chatWin.scrollHeight;
-    } catch(e) {
-        document.getElementById(tid).innerText = "Ошибка токена или запроса. Проверь токен HuggingFace!";
-        console.error(e);
-    }
-}
+        function loadLevel(lvl) {
+            currentLevel = lvl;
+            currentIdx = 0;
+            document.getElementById('level-indicator').innerText = lvl;
+            initQuestion();
+        }
 
-initTask();
-save();
-</script>
+        function initQuestion() {
+            const q = knowledgeBase[currentLevel][currentIdx];
+            document.getElementById('q-ru').innerText = q.ru;
+            const opt = document.getElementById('options');
+            opt.innerHTML = [...q.en].sort(() => Math.random() - 0.5).map(w => `
+                <button onclick="pick('${w}', this)" class="bg-gray-800 px-4 py-2 rounded-xl border border-gray-700 text-sm font-bold active:bg-blue-600 transition-colors">${w}</button>
+            `).join('');
+            document.getElementById('build-area').innerHTML = '';
+            userDraft = [];
+        }
+
+        function pick(word, btn) {
+            userDraft.push(word);
+            btn.style.visibility = 'hidden';
+            const span = document.createElement('span');
+            span.className = "bg-blue-600/20 text-blue-400 px-3 py-1 rounded-lg border border-blue-500/30 text-sm font-bold animate-fade-in";
+            span.innerText = word;
+            document.getElementById('build-area').appendChild(span);
+        }
+
+        function checkAnswer() {
+            const correct = knowledgeBase[currentLevel][currentIdx].en.join(' ');
+            const user = userDraft.join(' ');
+
+            if(user === correct) {
+                stats.learned++;
+                currentIdx = (currentIdx + 1) % knowledgeBase[currentLevel].length;
+                alert("Отлично! Двигаемся дальше.");
+                initQuestion();
+            } else {
+                stats.totalErrors++;
+                stats.errors.push({ wrong: user || "пусто", correct: correct });
+                alert("Не совсем так. Попробуй еще раз или загляни в статистику.");
+                initQuestion();
+            }
+            save();
+        }
+
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function resetStats() {
+            if(confirm("Сбросить всё обучение?")) {
+                stats = { learned: 0, errors: [], totalErrors: 0 };
+                save();
+                location.reload();
+            }
+        }
+
+        initQuestion();
+        save();
+    </script>
 </body>
 </html>
