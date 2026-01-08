@@ -3,111 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SimpleX - English & Stats</title>
+    <title>SimpleX Pro - Stats & AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap');
-        body { background: #080a0c; color: #f1f5f9; font-family: 'Manrope', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+        body { background: #05070a; color: #f1f5f9; font-family: 'Plus Jakarta Sans', sans-serif; }
         .tab-content { display: none; }
         .active { display: block; }
-        .glass { background: #12161b; border: 1px solid #232a35; border-radius: 20px; }
-        .card-inner { transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; height: 180px; }
-        .card-inner.flipped { transform: rotateY(180deg); }
-        .card-face { backface-visibility: hidden; position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 20px; text-align: center; padding: 20px; font-size: 1.2rem; font-weight: 800; }
-        .card-back { transform: rotateY(180deg); background: #1e293b; color: #3b82f6; border: 2px solid #3b82f6; }
+        .glass { background: #11141b; border: 1px solid #1f242d; border-radius: 24px; }
+        .btn-blue { background: #3b82f6; box-shadow: 0 10px 20px -10px rgba(59, 130, 246, 0.5); }
     </style>
 </head>
-<body class="p-4 flex flex-col min-h-screen">
+<body class="p-5 flex flex-col min-h-screen">
 
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-xl font-black text-blue-500 tracking-tighter">SimpleX</h1>
-        <div class="flex gap-4 text-[10px] font-bold uppercase text-gray-500">
-            <div>Ошибок: <span id="st-err-top" class="text-red-500">0</span></div>
-            <div>Слов: <span id="st-words-top" class="text-green-500">0</span></div>
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-xl font-extrabold tracking-tighter text-blue-500">SimpleX</h1>
+        <div class="flex gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+            <div class="flex flex-col items-end"><span>Ошибок</span><span id="st-err-top" class="text-red-500 text-sm italic">0</span></div>
+            <div class="flex flex-col items-end"><span>Слов</span><span id="st-words-top" class="text-green-500 text-sm italic">0</span></div>
         </div>
     </div>
 
     <div class="flex-1">
         <section id="tab-learn" class="tab-content active">
-            <div class="glass p-6 mb-4">
-                <p class="text-gray-500 text-xs mb-2">Переведи фразу:</p>
-                <h2 id="task-ru" class="text-lg font-bold mb-4 italic">...</h2>
-                <div id="drop-zone" class="min-h-[50px] border-b border-gray-800 mb-6 flex flex-wrap gap-2 pb-2"></div>
+            <div class="glass p-6 mb-6">
+                <p class="text-gray-500 text-[10px] uppercase font-bold mb-3 tracking-widest">Переведи фразу:</p>
+                <h2 id="task-ru" class="text-lg font-bold mb-6 text-blue-50">...</h2>
+                <div id="drop-zone" class="min-h-[50px] border-b border-gray-800 mb-8 flex flex-wrap gap-2 pb-3"></div>
                 <div id="word-bank" class="flex flex-wrap gap-2"></div>
             </div>
-            <button onclick="checkTask()" class="w-full py-4 bg-blue-600 rounded-2xl font-bold">Проверить</button>
+            <button onclick="checkTask()" class="w-full py-4 btn-blue rounded-2xl font-bold active:scale-95 transition-all">Проверить</button>
         </section>
 
-        <section id="tab-cards" class="tab-content">
-            <div class="card-inner glass" id="flashcard" onclick="this.classList.toggle('flipped')">
-                <div class="card-face" id="card-front">Word</div>
-                <div class="card-face card-back" id="card-back">Слово</div>
+        <section id="tab-chat" class="tab-content flex flex-col h-[65vh]">
+            <div id="ai-setup" class="mb-4 hidden">
+                <input id="ai-token-input" type="password" placeholder="Вставь свой токен HF сюда..." class="w-full bg-gray-900 border border-gray-800 p-3 rounded-xl text-xs outline-none">
+                <button onclick="saveToken()" class="mt-2 text-[10px] text-blue-500 uppercase font-bold">Сохранить токен</button>
             </div>
-            <div class="flex gap-4 mt-6">
-                <button onclick="cardRes(true)" class="flex-1 py-4 glass text-green-500 font-bold">Знаю</button>
-                <button onclick="cardRes(false)" class="flex-1 py-4 glass text-red-500 font-bold">Забыл</button>
-            </div>
-        </section>
-
-        <section id="tab-chat" class="tab-content flex flex-col h-[60vh]">
-            <div id="chat-win" class="flex-1 overflow-y-auto space-y-4 mb-4 text-sm"></div>
+            <div id="chat-win" class="flex-1 overflow-y-auto space-y-4 mb-4 text-sm scroll-smooth pr-2"></div>
             <div class="flex gap-2 mb-20">
-                <input id="chat-in" type="text" placeholder="Your message..." class="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-4 outline-none">
-                <button onclick="sendAI()" class="bg-blue-600 px-6 rounded-xl font-bold">></button>
+                <input id="chat-in" type="text" placeholder="Напиши учителю..." class="flex-1 bg-gray-900 border border-gray-800 rounded-2xl p-4 outline-none focus:border-blue-500">
+                <button onclick="sendAI()" class="btn-blue px-6 rounded-2xl font-bold">></button>
             </div>
         </section>
 
         <section id="tab-stats" class="tab-content">
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div class="glass p-4"><p class="text-[10px] text-gray-500 uppercase font-bold">Выучено</p><p id="st-learned" class="text-2xl font-black">0</p></div>
-                <div class="glass p-4"><p class="text-[10px] text-gray-500 uppercase font-bold">Ошибки</p><p id="st-errors" class="text-2xl font-black text-red-500">0</p></div>
+            <h2 class="text-xl font-bold mb-6 italic text-blue-500">Progress Report</h2>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="glass p-5"><p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Learned</p><p id="st-learned" class="text-2xl font-black">0</p></div>
+                <div class="glass p-5"><p class="text-[10px] text-gray-500 uppercase font-bold mb-1 text-red-500">Mistakes</p><p id="st-errors" class="text-2xl font-black text-red-500">0</p></div>
             </div>
-            <div class="glass p-4">
-                <h3 class="text-xs font-bold mb-3 border-b border-gray-800 pb-2 uppercase text-gray-400">Список ошибок:</h3>
-                <div id="error-log" class="space-y-2 text-[11px]"></div>
+            <div class="glass p-5">
+                <h3 class="text-xs font-bold mb-4 border-b border-gray-800 pb-2 uppercase text-gray-400">Journal (Last 5 errors):</h3>
+                <div id="error-log" class="space-y-3 text-[11px]"></div>
             </div>
+            <button onclick="localStorage.clear(); location.reload();" class="mt-10 text-[9px] text-red-900 uppercase font-bold tracking-widest">Сбросить всю статистику</button>
         </section>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-black border-t border-gray-900 p-4 flex justify-around rounded-t-3xl shadow-2xl">
-        <button onclick="switchTab('tab-learn')">🧩</button>
-        <button onclick="switchTab('tab-cards')">🎴</button>
-        <button onclick="switchTab('tab-chat')">🤖</button>
-        <button onclick="switchTab('tab-stats')">📊</button>
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-black/90 backdrop-blur-lg border-t border-gray-900 p-5 flex justify-around rounded-t-[40px]">
+        <button onclick="switchTab('tab-learn')" class="opacity-50 hover:opacity-100 transition-opacity">🧩</button>
+        <button onclick="switchTab('tab-chat')" class="opacity-50 hover:opacity-100 transition-opacity">🤖</button>
+        <button onclick="switchTab('tab-stats')" class="opacity-50 hover:opacity-100 transition-opacity">📊</button>
     </nav>
 
     <script>
-        const token = "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";
-        let stats = JSON.parse(localStorage.getItem('sx_stats')) || { learned: [], errors: [], errorCount: 0 };
+        let stats = JSON.parse(localStorage.getItem('simplex_v3_stats')) || { learned: [], errors: [], errorCount: 0 };
+        let hfToken = localStorage.getItem('hf_user_token') || "";
         
         const db = {
-            tasks: [{ru: "Я учу английский", en: ["I", "learn", "English"]}, {ru: "Это просто", en: ["It", "is", "simple"]}],
-            cards: [{en: "Consistent", ru: "Последовательный"}, {en: "Aware", ru: "Осведомленный"}]
+            tasks: [
+                {ru: "Я учу английский", en: ["I", "learn", "English"]},
+                {ru: "Мне нравится это приложение", en: ["I", "like", "this", "app"]},
+                {ru: "Ты мой учитель", en: ["You", "are", "my", "teacher"]}
+            ]
         };
 
-        let curTask = 0;
+        let cur = 0;
         let build = [];
 
+        function saveToken() {
+            const val = document.getElementById('ai-token-input').value.trim();
+            if(val) {
+                localStorage.setItem('hf_user_token', val);
+                hfToken = val;
+                alert("Токен сохранен в памяти телефона!");
+                document.getElementById('ai-setup').classList.add('hidden');
+            }
+        }
+
         function save() {
-            localStorage.setItem('sx_stats', JSON.stringify(stats));
+            localStorage.setItem('simplex_v3_stats', JSON.stringify(stats));
             document.getElementById('st-err-top').innerText = stats.errorCount;
             document.getElementById('st-words-top').innerText = stats.learned.length;
             document.getElementById('st-learned').innerText = stats.learned.length;
             document.getElementById('st-errors').innerText = stats.errorCount;
             const log = document.getElementById('error-log');
-            log.innerHTML = stats.errors.slice(-5).reverse().map(e => `<div class="flex justify-between font-mono"><span class="text-red-400">${e.w}</span> <span class="text-gray-600">→</span> <span class="text-green-400">${e.c}</span></div>`).join('');
+            log.innerHTML = stats.errors.slice(-5).reverse().map(e => `
+                <div class="border-l-2 border-red-500 pl-3">
+                    <div class="text-red-400 font-bold">Твой ответ: ${e.w}</div>
+                    <div class="text-green-400">Верно: ${e.c}</div>
+                </div>
+            `).join('');
         }
 
         function switchTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            if(id === 'tab-chat' && !hfToken) document.getElementById('ai-setup').classList.remove('hidden');
         }
 
         function initTask() {
-            const t = db.tasks[curTask];
+            const t = db.tasks[cur];
             document.getElementById('task-ru').innerText = t.ru;
             const bank = document.getElementById('word-bank');
-            bank.innerHTML = t.en.sort(() => Math.random() - 0.5).map(w => `<button onclick="pick('${w}', this)" class="bg-gray-800 px-3 py-2 rounded-lg border border-gray-700">${w}</button>`).join('');
+            bank.innerHTML = t.en.sort(() => Math.random() - 0.5).map(w => `<button onclick="pick('${w}', this)" class="bg-gray-800 px-4 py-2 rounded-xl border border-gray-700 font-bold">${w}</button>`).join('');
             document.getElementById('drop-zone').innerHTML = '';
             build = [];
         }
@@ -115,64 +125,52 @@
         function pick(w, btn) {
             build.push(w);
             btn.style.visibility = 'hidden';
-            document.getElementById('drop-zone').innerHTML += `<span class="bg-blue-600 px-3 py-1 rounded-lg m-1">${w}</span>`;
+            document.getElementById('drop-zone').innerHTML += `<span class="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-lg border border-blue-500/30 m-1">${w}</span>`;
         }
 
         function checkTask() {
-            const cor = db.tasks[curTask].en.join(' ');
+            const cor = db.tasks[cur].en.join(' ');
             const usr = build.join(' ');
             if (usr === cor) {
                 if(!stats.learned.includes(cor)) stats.learned.push(cor);
-                curTask = (curTask + 1) % db.tasks.length;
+                cur = (cur + 1) % db.tasks.length;
                 initTask();
             } else {
                 stats.errorCount++;
-                stats.errors.push({w: usr || "?", c: cor});
+                stats.errors.push({w: usr || "пусто", c: cor});
                 initTask();
             }
             save();
         }
 
-        let cIdx = 0;
-        function cardRes(k) {
-            if(k) { if(!stats.learned.includes(db.cards[cIdx].en)) stats.learned.push(db.cards[cIdx].en); }
-            else { stats.errorCount++; }
-            cIdx = (cIdx + 1) % db.cards.length;
-            document.getElementById('flashcard').classList.remove('flipped');
-            setTimeout(() => {
-                document.getElementById('card-front').innerText = db.cards[cIdx].en;
-                document.getElementById('card-back').innerText = db.cards[cIdx].ru;
-                save();
-            }, 300);
-        }
-
         async function sendAI() {
+            if(!hfToken) { alert("Сначала введи токен во вкладке чата!"); return; }
             const i = document.getElementById('chat-in');
             const w = document.getElementById('chat-win');
             if(!i.value) return;
             const msg = i.value;
-            w.innerHTML += `<div class="bg-blue-600 p-3 rounded-xl ml-auto max-w-[80%]">${msg}</div>`;
+            w.innerHTML += `<div class="bg-blue-600 p-4 rounded-3xl rounded-tr-none ml-auto max-w-[85%] text-white shadow-lg">${msg}</div>`;
             i.value = '';
-            const id = "t-"+Date.now();
-            w.innerHTML += `<div id="${id}" class="glass p-3 rounded-xl mr-auto max-w-[80%] italic animate-pulse">Wait...</div>`;
+            const tid = "t-"+Date.now();
+            w.innerHTML += `<div id="${tid}" class="glass p-4 rounded-3xl rounded-tl-none mr-auto max-w-[85%] italic text-gray-500 animate-pulse text-xs">Учитель подбирает слова...</div>`;
             w.scrollTop = w.scrollHeight;
 
             try {
                 const r = await fetch("https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct", {
-                    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+                    headers: { Authorization: "Bearer " + hfToken, "Content-Type": "application/json" },
                     method: "POST",
-                    body: JSON.stringify({ inputs: `<|begin_of_text|><|start_header_id|>system<|end_header_id|>English teacher. Short answers.<|eot_id|><|start_header_id|>user<|end_header_id|>${msg}<|eot_id|><|start_header_id|>assistant<|end_header_id|>` }),
+                    body: JSON.stringify({ inputs: `<|begin_of_text|><|start_header_id|>system<|end_header_id|>You are a helpful English teacher for Russian student. Answer in English, briefly. Explain in Russian if student makes a mistake.<|eot_id|><|start_header_id|>user<|end_header_id|>${msg}<|eot_id|><|start_header_id|>assistant<|end_header_id|>` }),
                 });
                 const d = await r.json();
-                document.getElementById(id).remove();
+                document.getElementById(tid).remove();
                 let txt = d[0].generated_text.split('assistant').pop().replace('<|eot_id|>', '').trim();
-                w.innerHTML += `<div class="glass p-3 rounded-xl mr-auto max-w-[80%] border-l-4 border-blue-500">${txt}</div>`;
-            } catch(e) { document.getElementById(id).innerText = "Error. Check HuggingFace."; }
+                w.innerHTML += `<div class="glass p-4 rounded-3xl rounded-tl-none mr-auto max-w-[85%] border-l-4 border-blue-500 shadow-sm">${txt}</div>`;
+            } catch(e) { 
+                document.getElementById(tid).innerText = "Ошибка токена. Нажми '📊' и сбрось данные, чтобы ввести новый."; 
+            }
             w.scrollTop = w.scrollHeight;
         }
 
-        document.getElementById('card-front').innerText = db.cards[0].en;
-        document.getElementById('card-back').innerText = db.cards[0].ru;
         initTask();
         save();
     </script>
