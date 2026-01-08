@@ -3,183 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SimpleX - English Pro</title>
+    <title>SimpleX - English</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { background-color: #05070a; color: #ffffff; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass-card { background: #11141b; border: 1px solid #1f242d; border-radius: 28px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Inter', sans-serif; }
+        .glass { background: #161b22; border: 1px solid #30363d; border-radius: 20px; }
         .tab-content { display: none; }
         .active { display: block; }
-        
-        /* Анимация переворота карточки */
-        .flashcard-inner { transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; position: relative; height: 250px; }
-        .flashcard-inner.flipped { transform: rotateY(180deg); }
-        .card-face { backface-visibility: hidden; position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 28px; padding: 20px; text-align: center; }
-        .card-back { transform: rotateY(180deg); background: #1e293b; border: 2px solid #3b82f6; }
+        /* Стили для карточек */
+        .card-inner { transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; height: 200px; }
+        .card-inner.flipped { transform: rotateY(180deg); }
+        .card-face { backface-visibility: hidden; position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 20px; padding: 20px; text-align: center; font-size: 1.5rem; font-weight: bold; }
+        .card-back { transform: rotateY(180deg); background: #1f2937; color: #3b82f6; }
     </style>
 </head>
 <body>
 
-    <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col p-5">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col p-4">
         
-        <header class="flex justify-between items-center mb-6">
-            <div>
-                <h1 class="text-xl font-extrabold text-blue-500">SimpleX</h1>
-                <p id="lvl-info" class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Level 1 • Beginner</p>
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-black text-blue-500">SimpleX</h1>
+            <div id="stats" class="text-right text-xs font-bold text-gray-500 uppercase">
+                <span id="lvl">Уровень 1</span> • <span id="xp">0 XP</span>
             </div>
-            <div id="xp-counter" class="bg-blue-600/20 text-blue-400 px-4 py-1.5 rounded-full text-xs font-black">0 XP</div>
-        </header>
+        </div>
 
-        <main id="tab-learn" class="tab-content active">
-            <div class="glass-card p-6 mb-4">
-                <p class="text-gray-400 text-xs text-center mb-2 uppercase">Переведи на английский:</p>
-                <h2 id="task-text" class="text-xl font-semibold text-center mb-6">Я учусь каждый день</h2>
-                <div id="build-zone" class="min-h-[60px] border-b border-gray-800 mb-6 flex flex-wrap justify-center gap-2 pb-4"></div>
-                <div id="word-bank" class="flex flex-wrap justify-center gap-2"></div>
-            </div>
-            <button onclick="checkBuild()" class="w-full py-4 bg-blue-600 rounded-2xl font-bold shadow-lg shadow-blue-900/20">Проверить ответ</button>
-        </main>
-
-        <main id="tab-cards" class="tab-content">
-            <div class="perspective-1000">
-                <div id="flashcard" class="flashcard-inner" onclick="this.classList.toggle('flipped')">
-                    <div class="card-face glass-card text-3xl font-bold">Opportunity</div>
-                    <div class="card-face card-back flex flex-col">
-                        <span class="text-2xl font-bold">Возможность</span>
-                        <p class="text-sm text-blue-200 mt-4 italic">"This is a great opportunity for you"</p>
+        <div class="flex-1">
+            
+            <section id="tab-cards" class="tab-content active">
+                <h2 class="text-lg font-bold mb-4">Карточки слов</h2>
+                <div class="perspective-1000">
+                    <div id="flashcard" class="card-inner glass" onclick="this.classList.toggle('flipped')">
+                        <div class="card-face">Experience</div>
+                        <div class="card-face card-back">Опыт<br><span class="text-xs mt-2 text-gray-400">"I have much experience"</span></div>
                     </div>
                 </div>
-            </div>
-            <div class="flex gap-3 mt-8">
-                <button onclick="nextCard('easy')" class="flex-1 py-3 bg-green-600/20 text-green-400 border border-green-600/30 rounded-xl font-bold">Знаю</button>
-                <button onclick="nextCard('hard')" class="flex-1 py-3 bg-red-600/20 text-red-400 border border-red-600/30 rounded-xl font-bold">Забыл</button>
-            </div>
-        </main>
-
-        <main id="tab-chat" class="tab-content flex-1 flex flex-col h-[65vh]">
-            <div id="chat-box" class="flex-1 overflow-y-auto space-y-4 mb-4 pr-1 scroll-smooth">
-                <div class="glass-card p-4 rounded-tl-none max-w-[90%] text-sm">
-                    Привет! Я твой учитель английского. Я знаю, что твой родной язык русский, поэтому буду помогать тебе с переводом, если возникнут трудности. О чем хочешь поговорить?
+                <div class="flex gap-4 mt-6">
+                    <button onclick="nextCard()" class="flex-1 py-4 glass hover:bg-gray-800 font-bold text-green-500">Знаю</button>
+                    <button onclick="nextCard()" class="flex-1 py-4 glass hover:bg-gray-800 font-bold text-red-500">Забыл</button>
                 </div>
-            </div>
-            <div class="flex gap-2 mb-20">
-                <input id="chat-input" type="text" placeholder="Пиши по-английски..." class="flex-1 bg-gray-900 border border-gray-800 rounded-2xl p-4 text-white outline-none focus:border-blue-500">
-                <button onclick="sendMsg()" class="bg-blue-600 p-4 rounded-2xl font-bold">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                </button>
-            </div>
-        </main>
+            </section>
 
-        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-black/80 backdrop-blur-md border-t border-gray-900 p-4 flex justify-around rounded-t-[35px]">
-            <button onclick="switchTab('tab-learn')" class="flex flex-col items-center">
-                <span class="text-xl">🧩</span>
-                <span class="text-[9px] uppercase font-bold text-gray-500 mt-1">Квиз</span>
-            </button>
-            <button onclick="switchTab('tab-cards')" class="flex flex-col items-center">
-                <span class="text-xl">🎴</span>
-                <span class="text-[9px] uppercase font-bold text-gray-500 mt-1">Карты</span>
-            </button>
-            <button onclick="switchTab('tab-chat')" class="flex flex-col items-center">
-                <span class="text-xl">🤖</span>
-                <span class="text-[9px] uppercase font-bold text-gray-500 mt-1">Чат</span>
-            </button>
+            <section id="tab-chat" class="tab-content">
+                <div id="chat-win" class="h-[60vh] overflow-y-auto space-y-4 mb-4 text-sm p-2">
+                    <div class="glass p-4 rounded-tl-none max-w-[85%]">
+                        Привет! Я твой учитель SimpleX. Я знаю, что ты говоришь по-русски. Давай практиковать английский!
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <input id="chat-in" type="text" placeholder="Напиши что-нибудь..." class="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-4 text-white outline-none focus:border-blue-500">
+                    <button onclick="sendMsg()" class="bg-blue-600 px-6 rounded-xl font-bold">></button>
+                </div>
+            </section>
+
+        </div>
+
+        <nav class="mt-8 glass p-2 flex justify-around">
+            <button onclick="switchTab('tab-cards')" class="p-4 text-xl">🎴</button>
+            <button onclick="switchTab('tab-chat')" class="p-4 text-xl">🤖</button>
         </nav>
     </div>
 
     <script>
         let xp = parseInt(localStorage.getItem('sx_xp')) || 0;
         const token = "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";
-        
-        // КАРТОЧКИ
-        const deck = [
-            {en: "Curious", ru: "Любопытный", ex: "He is a curious student."},
-            {en: "Improve", ru: "Улучшать", ex: "I want to improve my English."},
-            {en: "Decision", ru: "Решение", ex: "It was a very difficult decision."}
+
+        const words = [
+            {en: "Challenge", ru: "Вызов / Сложность", ex: "It's a big challenge"},
+            {en: "Opportunity", ru: "Возможность", ex: "New opportunity for you"},
+            {en: "Improve", ru: "Улучшать", ex: "Improve your skills"}
         ];
-        let cardIdx = 0;
+        let wordIdx = 0;
 
-        function nextCard(type) {
-            if(type === 'easy') xp += 15;
-            cardIdx = (cardIdx + 1) % deck.length;
-            const card = document.getElementById('flashcard');
-            card.classList.remove('flipped');
-            setTimeout(() => {
-                card.querySelector('.card-face:not(.card-back)').innerText = deck[cardIdx].en;
-                card.querySelector('.card-back').innerHTML = `<span class="text-2xl font-bold">${deck[cardIdx].ru}</span><p class="text-sm text-blue-200 mt-4 italic">"${deck[cardIdx].ex}"</p>`;
-                updateUI();
-            }, 300);
-        }
-
-        // КОНСТРУКТОР
-        const tasks = [{ru: "Я учу английский", en: ["I", "learn", "English"]}];
-        let userWords = [];
-
-        function initBuild() {
-            const task = tasks[0];
-            document.getElementById('task-text').innerText = task.ru;
-            const bank = document.getElementById('word-bank');
-            bank.innerHTML = task.en.sort(() => Math.random()-0.5).map(w => `<button onclick="pick('${w}', this)" class="bg-gray-800 px-4 py-2 rounded-xl border border-gray-700 font-medium">${w}</button>`).join('');
-            document.getElementById('build-zone').innerHTML = '';
-            userWords = [];
-        }
-
-        function pick(w, btn) {
-            userWords.push(w);
-            btn.style.display = 'none';
-            document.getElementById('build-zone').innerHTML += `<span class="bg-blue-600 px-3 py-1 rounded-lg m-1">${w}</span>`;
-        }
-
-        function checkBuild() {
-            if(userWords.join(' ') === tasks[0].en.join(' ')) {
-                alert("Правильно! +20 XP");
-                xp += 20;
-                initBuild();
-            } else {
-                alert("Попробуй еще раз");
-                initBuild();
-            }
-            updateUI();
-        }
-
-        // ЧАТ С ИИ (Llama-3)
-        async function sendMsg() {
-            const input = document.getElementById('chat-input');
-            const box = document.getElementById('chat-box');
-            const val = input.value;
-            if(!val) return;
-
-            box.innerHTML += `<div class="bg-blue-600 p-4 rounded-2xl rounded-tr-none max-w-[90%] ml-auto text-sm shadow-lg">${val}</div>`;
-            input.value = '';
-            box.scrollTop = box.scrollHeight;
-
-            const tempId = "t-"+Date.now();
-            box.innerHTML += `<div id="${tempId}" class="glass-card p-4 rounded-tl-none max-w-[90%] text-sm italic text-gray-500 animate-pulse">Учитель думает...</div>`;
-
-            try {
-                const res = await fetch("https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct", {
-                    headers: { Authorization: `Bearer ${token}` },
-                    method: "POST",
-                    body: JSON.stringify({ 
-                        inputs: `<|begin_of_text|><|start_header_id|>system<|end_header_id|>You are a friendly English teacher for a Russian student. If the student makes a mistake, correct it. Explain in Russian if necessary, but keep the conversation in English.<|eot_id|><|start_header_id|>user<|end_header_id|>${val}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
-                        parameters: { max_new_tokens: 150, stop: ["<|eot_id|>"] }
-                    }),
-                });
-                const data = await res.json();
-                document.getElementById(tempId).remove();
-                let reply = data[0].generated_text.split('assistant').pop().trim();
-                box.innerHTML += `<div class="glass-card p-4 rounded-tl-none max-w-[90%] text-sm border-l-4 border-blue-500 shadow-xl">${reply}</div>`;
-                xp += 10;
-                updateUI();
-            } catch(e) {
-                document.getElementById(tempId).innerText = "Ошибка связи. Проверь токен!";
-            }
-            box.scrollTop = box.scrollHeight;
-        }
-
-        function updateUI() {
-            document.getElementById('xp-counter').innerText = `${xp} XP`;
-            document.getElementById('lvl-info').innerText = `Level ${Math.floor(xp/100)+1} • Beginner`;
+        function updateStats() {
+            document.getElementById('xp').innerText = `${xp} XP`;
+            document.getElementById('lvl').innerText = `Уровень ${Math.floor(xp/100) + 1}`;
             localStorage.setItem('sx_xp', xp);
         }
 
@@ -188,8 +87,54 @@
             document.getElementById(id).classList.add('active');
         }
 
-        initBuild();
-        updateUI();
+        function nextCard() {
+            wordIdx = (wordIdx + 1) % words.length;
+            const card = document.getElementById('flashcard');
+            card.classList.remove('flipped');
+            setTimeout(() => {
+                card.querySelector('.card-face:not(.card-back)').innerText = words[wordIdx].en;
+                card.querySelector('.card-back').innerHTML = `${words[wordIdx].ru}<br><span class="text-xs mt-2 text-gray-400">"${words[wordIdx].ex}"</span>`;
+                xp += 10;
+                updateStats();
+            }, 300);
+        }
+
+        async function sendMsg() {
+            const input = document.getElementById('chat-in');
+            const win = document.getElementById('chat-win');
+            const val = input.value.trim();
+            if(!val) return;
+
+            win.innerHTML += `<div class="bg-blue-600 p-4 rounded-tr-none max-w-[85%] ml-auto text-white rounded-2xl">${val}</div>`;
+            input.value = '';
+            
+            const tid = "t-" + Date.now();
+            win.innerHTML += `<div id="${tid}" class="glass p-4 rounded-tl-none max-w-[85%] italic text-gray-500">Думаю...</div>`;
+            win.scrollTop = win.scrollHeight;
+
+            try {
+                const res = await fetch("https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct", {
+                    headers: { Authorization: `Bearer ${token}` },
+                    method: "POST",
+                    body: JSON.stringify({ 
+                        inputs: `<|begin_of_text|><|start_header_id|>system<|end_header_id|>You are a friendly English teacher for a Russian student. Answer in English, but you can explain in Russian if the student is confused.<|eot_id|><|start_header_id|>user<|end_header_id|>${val}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
+                        parameters: { max_new_tokens: 100 }
+                    }),
+                });
+                const data = await res.json();
+                document.getElementById(tid).remove();
+                
+                let reply = data[0].generated_text.split('assistant').pop().trim();
+                win.innerHTML += `<div class="glass p-4 rounded-tl-none max-w-[85%] border-l-4 border-blue-500">${reply}</div>`;
+                xp += 20;
+                updateStats();
+            } catch(e) {
+                document.getElementById(tid).innerText = "Ошибка связи. Проверь токен на Hugging Face!";
+            }
+            win.scrollTop = win.scrollHeight;
+        }
+
+        updateStats();
     </script>
 </body>
 </html>
