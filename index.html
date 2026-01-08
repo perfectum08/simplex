@@ -3,83 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SimpleX - English</title>
+    <title>SimpleX - English & Stats</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Inter', sans-serif; }
-        .glass { background: #161b22; border: 1px solid #30363d; border-radius: 20px; }
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap');
+        body { background: #080a0c; color: #f1f5f9; font-family: 'Manrope', sans-serif; }
         .tab-content { display: none; }
         .active { display: block; }
-        /* Стили для карточек */
-        .card-inner { transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; height: 200px; }
+        .glass { background: #12161b; border: 1px solid #232a35; border-radius: 20px; }
+        .card-inner { transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; height: 180px; }
         .card-inner.flipped { transform: rotateY(180deg); }
-        .card-face { backface-visibility: hidden; position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 20px; padding: 20px; text-align: center; font-size: 1.5rem; font-weight: bold; }
-        .card-back { transform: rotateY(180deg); background: #1f2937; color: #3b82f6; }
+        .card-face { backface-visibility: hidden; position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 20px; text-align: center; padding: 20px; font-size: 1.2rem; font-weight: 800; }
+        .card-back { transform: rotateY(180deg); background: #1e293b; color: #3b82f6; border: 2px solid #3b82f6; }
     </style>
 </head>
-<body>
+<body class="p-4 flex flex-col min-h-screen">
 
-    <div class="max-w-md mx-auto min-h-screen flex flex-col p-4">
-        
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-black text-blue-500">SimpleX</h1>
-            <div id="stats" class="text-right text-xs font-bold text-gray-500 uppercase">
-                <span id="lvl">Уровень 1</span> • <span id="xp">0 XP</span>
-            </div>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-xl font-black text-blue-500 tracking-tighter">SimpleX</h1>
+        <div class="flex gap-4 text-[10px] font-bold uppercase text-gray-500">
+            <div>Ошибок: <span id="st-err-top" class="text-red-500">0</span></div>
+            <div>Слов: <span id="st-words-top" class="text-green-500">0</span></div>
         </div>
-
-        <div class="flex-1">
-            
-            <section id="tab-cards" class="tab-content active">
-                <h2 class="text-lg font-bold mb-4">Карточки слов</h2>
-                <div class="perspective-1000">
-                    <div id="flashcard" class="card-inner glass" onclick="this.classList.toggle('flipped')">
-                        <div class="card-face">Experience</div>
-                        <div class="card-face card-back">Опыт<br><span class="text-xs mt-2 text-gray-400">"I have much experience"</span></div>
-                    </div>
-                </div>
-                <div class="flex gap-4 mt-6">
-                    <button onclick="nextCard()" class="flex-1 py-4 glass hover:bg-gray-800 font-bold text-green-500">Знаю</button>
-                    <button onclick="nextCard()" class="flex-1 py-4 glass hover:bg-gray-800 font-bold text-red-500">Забыл</button>
-                </div>
-            </section>
-
-            <section id="tab-chat" class="tab-content">
-                <div id="chat-win" class="h-[60vh] overflow-y-auto space-y-4 mb-4 text-sm p-2">
-                    <div class="glass p-4 rounded-tl-none max-w-[85%]">
-                        Привет! Я твой учитель SimpleX. Я знаю, что ты говоришь по-русски. Давай практиковать английский!
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <input id="chat-in" type="text" placeholder="Напиши что-нибудь..." class="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-4 text-white outline-none focus:border-blue-500">
-                    <button onclick="sendMsg()" class="bg-blue-600 px-6 rounded-xl font-bold">></button>
-                </div>
-            </section>
-
-        </div>
-
-        <nav class="mt-8 glass p-2 flex justify-around">
-            <button onclick="switchTab('tab-cards')" class="p-4 text-xl">🎴</button>
-            <button onclick="switchTab('tab-chat')" class="p-4 text-xl">🤖</button>
-        </nav>
     </div>
 
+    <div class="flex-1">
+        <section id="tab-learn" class="tab-content active">
+            <div class="glass p-6 mb-4">
+                <p class="text-gray-500 text-xs mb-2">Переведи фразу:</p>
+                <h2 id="task-ru" class="text-lg font-bold mb-4 italic">...</h2>
+                <div id="drop-zone" class="min-h-[50px] border-b border-gray-800 mb-6 flex flex-wrap gap-2 pb-2"></div>
+                <div id="word-bank" class="flex flex-wrap gap-2"></div>
+            </div>
+            <button onclick="checkTask()" class="w-full py-4 bg-blue-600 rounded-2xl font-bold">Проверить</button>
+        </section>
+
+        <section id="tab-cards" class="tab-content">
+            <div class="card-inner glass" id="flashcard" onclick="this.classList.toggle('flipped')">
+                <div class="card-face" id="card-front">Word</div>
+                <div class="card-face card-back" id="card-back">Слово</div>
+            </div>
+            <div class="flex gap-4 mt-6">
+                <button onclick="cardRes(true)" class="flex-1 py-4 glass text-green-500 font-bold">Знаю</button>
+                <button onclick="cardRes(false)" class="flex-1 py-4 glass text-red-500 font-bold">Забыл</button>
+            </div>
+        </section>
+
+        <section id="tab-chat" class="tab-content flex flex-col h-[60vh]">
+            <div id="chat-win" class="flex-1 overflow-y-auto space-y-4 mb-4 text-sm"></div>
+            <div class="flex gap-2 mb-20">
+                <input id="chat-in" type="text" placeholder="Your message..." class="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-4 outline-none">
+                <button onclick="sendAI()" class="bg-blue-600 px-6 rounded-xl font-bold">></button>
+            </div>
+        </section>
+
+        <section id="tab-stats" class="tab-content">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="glass p-4"><p class="text-[10px] text-gray-500 uppercase font-bold">Выучено</p><p id="st-learned" class="text-2xl font-black">0</p></div>
+                <div class="glass p-4"><p class="text-[10px] text-gray-500 uppercase font-bold">Ошибки</p><p id="st-errors" class="text-2xl font-black text-red-500">0</p></div>
+            </div>
+            <div class="glass p-4">
+                <h3 class="text-xs font-bold mb-3 border-b border-gray-800 pb-2 uppercase text-gray-400">Список ошибок:</h3>
+                <div id="error-log" class="space-y-2 text-[11px]"></div>
+            </div>
+        </section>
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-black border-t border-gray-900 p-4 flex justify-around rounded-t-3xl shadow-2xl">
+        <button onclick="switchTab('tab-learn')">🧩</button>
+        <button onclick="switchTab('tab-cards')">🎴</button>
+        <button onclick="switchTab('tab-chat')">🤖</button>
+        <button onclick="switchTab('tab-stats')">📊</button>
+    </nav>
+
     <script>
-        let xp = parseInt(localStorage.getItem('sx_xp')) || 0;
-        const token = "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";
+        const token = "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";
+        let stats = JSON.parse(localStorage.getItem('sx_stats')) || { learned: [], errors: [], errorCount: 0 };
+        
+        const db = {
+            tasks: [{ru: "Я учу английский", en: ["I", "learn", "English"]}, {ru: "Это просто", en: ["It", "is", "simple"]}],
+            cards: [{en: "Consistent", ru: "Последовательный"}, {en: "Aware", ru: "Осведомленный"}]
+        };
 
-        const words = [
-            {en: "Challenge", ru: "Вызов / Сложность", ex: "It's a big challenge"},
-            {en: "Opportunity", ru: "Возможность", ex: "New opportunity for you"},
-            {en: "Improve", ru: "Улучшать", ex: "Improve your skills"}
-        ];
-        let wordIdx = 0;
+        let curTask = 0;
+        let build = [];
 
-        function updateStats() {
-            document.getElementById('xp').innerText = `${xp} XP`;
-            document.getElementById('lvl').innerText = `Уровень ${Math.floor(xp/100) + 1}`;
-            localStorage.setItem('sx_xp', xp);
+        function save() {
+            localStorage.setItem('sx_stats', JSON.stringify(stats));
+            document.getElementById('st-err-top').innerText = stats.errorCount;
+            document.getElementById('st-words-top').innerText = stats.learned.length;
+            document.getElementById('st-learned').innerText = stats.learned.length;
+            document.getElementById('st-errors').innerText = stats.errorCount;
+            const log = document.getElementById('error-log');
+            log.innerHTML = stats.errors.slice(-5).reverse().map(e => `<div class="flex justify-between font-mono"><span class="text-red-400">${e.w}</span> <span class="text-gray-600">→</span> <span class="text-green-400">${e.c}</span></div>`).join('');
         }
 
         function switchTab(id) {
@@ -87,54 +103,78 @@
             document.getElementById(id).classList.add('active');
         }
 
-        function nextCard() {
-            wordIdx = (wordIdx + 1) % words.length;
-            const card = document.getElementById('flashcard');
-            card.classList.remove('flipped');
+        function initTask() {
+            const t = db.tasks[curTask];
+            document.getElementById('task-ru').innerText = t.ru;
+            const bank = document.getElementById('word-bank');
+            bank.innerHTML = t.en.sort(() => Math.random() - 0.5).map(w => `<button onclick="pick('${w}', this)" class="bg-gray-800 px-3 py-2 rounded-lg border border-gray-700">${w}</button>`).join('');
+            document.getElementById('drop-zone').innerHTML = '';
+            build = [];
+        }
+
+        function pick(w, btn) {
+            build.push(w);
+            btn.style.visibility = 'hidden';
+            document.getElementById('drop-zone').innerHTML += `<span class="bg-blue-600 px-3 py-1 rounded-lg m-1">${w}</span>`;
+        }
+
+        function checkTask() {
+            const cor = db.tasks[curTask].en.join(' ');
+            const usr = build.join(' ');
+            if (usr === cor) {
+                if(!stats.learned.includes(cor)) stats.learned.push(cor);
+                curTask = (curTask + 1) % db.tasks.length;
+                initTask();
+            } else {
+                stats.errorCount++;
+                stats.errors.push({w: usr || "?", c: cor});
+                initTask();
+            }
+            save();
+        }
+
+        let cIdx = 0;
+        function cardRes(k) {
+            if(k) { if(!stats.learned.includes(db.cards[cIdx].en)) stats.learned.push(db.cards[cIdx].en); }
+            else { stats.errorCount++; }
+            cIdx = (cIdx + 1) % db.cards.length;
+            document.getElementById('flashcard').classList.remove('flipped');
             setTimeout(() => {
-                card.querySelector('.card-face:not(.card-back)').innerText = words[wordIdx].en;
-                card.querySelector('.card-back').innerHTML = `${words[wordIdx].ru}<br><span class="text-xs mt-2 text-gray-400">"${words[wordIdx].ex}"</span>`;
-                xp += 10;
-                updateStats();
+                document.getElementById('card-front').innerText = db.cards[cIdx].en;
+                document.getElementById('card-back').innerText = db.cards[cIdx].ru;
+                save();
             }, 300);
         }
 
-        async function sendMsg() {
-            const input = document.getElementById('chat-in');
-            const win = document.getElementById('chat-win');
-            const val = input.value.trim();
-            if(!val) return;
-
-            win.innerHTML += `<div class="bg-blue-600 p-4 rounded-tr-none max-w-[85%] ml-auto text-white rounded-2xl">${val}</div>`;
-            input.value = '';
-            
-            const tid = "t-" + Date.now();
-            win.innerHTML += `<div id="${tid}" class="glass p-4 rounded-tl-none max-w-[85%] italic text-gray-500">Думаю...</div>`;
-            win.scrollTop = win.scrollHeight;
+        async function sendAI() {
+            const i = document.getElementById('chat-in');
+            const w = document.getElementById('chat-win');
+            if(!i.value) return;
+            const msg = i.value;
+            w.innerHTML += `<div class="bg-blue-600 p-3 rounded-xl ml-auto max-w-[80%]">${msg}</div>`;
+            i.value = '';
+            const id = "t-"+Date.now();
+            w.innerHTML += `<div id="${id}" class="glass p-3 rounded-xl mr-auto max-w-[80%] italic animate-pulse">Wait...</div>`;
+            w.scrollTop = w.scrollHeight;
 
             try {
-                const res = await fetch("https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct", {
-                    headers: { Authorization: `Bearer ${token}` },
+                const r = await fetch("https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct", {
+                    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
                     method: "POST",
-                    body: JSON.stringify({ 
-                        inputs: `<|begin_of_text|><|start_header_id|>system<|end_header_id|>You are a friendly English teacher for a Russian student. Answer in English, but you can explain in Russian if the student is confused.<|eot_id|><|start_header_id|>user<|end_header_id|>${val}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
-                        parameters: { max_new_tokens: 100 }
-                    }),
+                    body: JSON.stringify({ inputs: `<|begin_of_text|><|start_header_id|>system<|end_header_id|>English teacher. Short answers.<|eot_id|><|start_header_id|>user<|end_header_id|>${msg}<|eot_id|><|start_header_id|>assistant<|end_header_id|>` }),
                 });
-                const data = await res.json();
-                document.getElementById(tid).remove();
-                
-                let reply = data[0].generated_text.split('assistant').pop().trim();
-                win.innerHTML += `<div class="glass p-4 rounded-tl-none max-w-[85%] border-l-4 border-blue-500">${reply}</div>`;
-                xp += 20;
-                updateStats();
-            } catch(e) {
-                document.getElementById(tid).innerText = "Ошибка связи. Проверь токен на Hugging Face!";
-            }
-            win.scrollTop = win.scrollHeight;
+                const d = await r.json();
+                document.getElementById(id).remove();
+                let txt = d[0].generated_text.split('assistant').pop().replace('<|eot_id|>', '').trim();
+                w.innerHTML += `<div class="glass p-3 rounded-xl mr-auto max-w-[80%] border-l-4 border-blue-500">${txt}</div>`;
+            } catch(e) { document.getElementById(id).innerText = "Error. Check HuggingFace."; }
+            w.scrollTop = w.scrollHeight;
         }
 
-        updateStats();
+        document.getElementById('card-front').innerText = db.cards[0].en;
+        document.getElementById('card-back').innerText = db.cards[0].ru;
+        initTask();
+        save();
     </script>
 </body>
 </html>
