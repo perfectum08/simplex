@@ -3,144 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SimpleX - Learn English</title>
+    <title>SimpleX - English Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: white; }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .progress-orange { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { background-color: #05070a; color: #ffffff; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card { background: #11141b; border: 1px solid #1f242d; border-radius: 28px; }
         .tab-content { display: none; }
         .active { display: block; }
-        #chat-window::-webkit-scrollbar { width: 4px; }
-        #chat-window::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        
+        /* Анимация переворота карточки */
+        .flashcard-inner { transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; position: relative; height: 250px; }
+        .flashcard-inner.flipped { transform: rotateY(180deg); }
+        .card-face { backface-visibility: hidden; position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 28px; padding: 20px; text-align: center; }
+        .card-back { transform: rotateY(180deg); background: #1e293b; border: 2px solid #3b82f6; }
     </style>
 </head>
-<body class="font-sans">
+<body>
 
-    <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col">
+    <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col p-5">
         
-        <header class="p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-2xl font-black tracking-tighter text-orange-500">SimpleX</h1>
-                <div class="text-right">
-                    <p id="user-level" class="text-xs uppercase font-bold text-slate-400">Уровень 1</p>
-                    <p id="user-xp" class="text-sm font-mono text-orange-300">0 / 100 XP</p>
-                </div>
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-xl font-extrabold text-blue-500">SimpleX</h1>
+                <p id="lvl-info" class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Level 1 • Beginner</p>
             </div>
-            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                <div id="xp-bar" class="progress-orange h-full transition-all duration-500" style="width: 0%"></div>
-            </div>
+            <div id="xp-counter" class="bg-blue-600/20 text-blue-400 px-4 py-1.5 rounded-full text-xs font-black">0 XP</div>
         </header>
 
-        <main id="tab-lessons" class="tab-content active px-6">
-            <h2 class="text-xl font-bold mb-4">Твои уроки</h2>
-            <div class="space-y-4">
-                <div class="glass p-5 rounded-2xl flex justify-between items-center border-l-4 border-orange-500">
-                    <div>
-                        <h3 class="font-bold">First Steps</h3>
-                        <p class="text-xs text-slate-400">Базовые фразы и приветствия</p>
+        <main id="tab-learn" class="tab-content active">
+            <div class="glass-card p-6 mb-4">
+                <p class="text-gray-400 text-xs text-center mb-2 uppercase">Переведи на английский:</p>
+                <h2 id="task-text" class="text-xl font-semibold text-center mb-6">Я учусь каждый день</h2>
+                <div id="build-zone" class="min-h-[60px] border-b border-gray-800 mb-6 flex flex-wrap justify-center gap-2 pb-4"></div>
+                <div id="word-bank" class="flex flex-wrap justify-center gap-2"></div>
+            </div>
+            <button onclick="checkBuild()" class="w-full py-4 bg-blue-600 rounded-2xl font-bold shadow-lg shadow-blue-900/20">Проверить ответ</button>
+        </main>
+
+        <main id="tab-cards" class="tab-content">
+            <div class="perspective-1000">
+                <div id="flashcard" class="flashcard-inner" onclick="this.classList.toggle('flipped')">
+                    <div class="card-face glass-card text-3xl font-bold">Opportunity</div>
+                    <div class="card-face card-back flex flex-col">
+                        <span class="text-2xl font-bold">Возможность</span>
+                        <p class="text-sm text-blue-200 mt-4 italic">"This is a great opportunity for you"</p>
                     </div>
-                    <button class="bg-orange-500 p-2 rounded-lg">🔥</button>
                 </div>
-                <div class="glass p-5 rounded-2xl flex justify-between items-center opacity-40">
-                    <div>
-                        <h3 class="font-bold">Daily Life</h3>
-                        <p class="text-xs text-slate-400">Нужен Уровень 2</p>
-                    </div>
-                    <span>🔒</span>
-                </div>
+            </div>
+            <div class="flex gap-3 mt-8">
+                <button onclick="nextCard('easy')" class="flex-1 py-3 bg-green-600/20 text-green-400 border border-green-600/30 rounded-xl font-bold">Знаю</button>
+                <button onclick="nextCard('hard')" class="flex-1 py-3 bg-red-600/20 text-red-400 border border-red-600/30 rounded-xl font-bold">Забыл</button>
             </div>
         </main>
 
-        <main id="tab-chat" class="tab-content px-6 flex-1 flex flex-col h-[60vh]">
-            <div id="chat-window" class="flex-1 overflow-y-auto space-y-4 mb-4 pr-2 text-sm flex flex-col">
-                <div class="glass p-3 rounded-2xl rounded-tl-none max-w-[85%] border border-slate-700">
-                    Hi! I'm your SimpleX tutor. Write something in English to earn XP! 🚀
+        <main id="tab-chat" class="tab-content flex-1 flex flex-col h-[65vh]">
+            <div id="chat-box" class="flex-1 overflow-y-auto space-y-4 mb-4 pr-1 scroll-smooth">
+                <div class="glass-card p-4 rounded-tl-none max-w-[90%] text-sm">
+                    Привет! Я твой учитель английского. Я знаю, что твой родной язык русский, поэтому буду помогать тебе с переводом, если возникнут трудности. О чем хочешь поговорить?
                 </div>
             </div>
-            <div class="flex gap-2 mb-24">
-                <input id="chat-input" type="text" placeholder="Write in English..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl p-4 text-white outline-none focus:ring-2 focus:ring-orange-500">
-                <button onclick="handleSend()" class="bg-orange-500 px-5 rounded-xl font-bold shadow-lg shadow-orange-900/20">></button>
+            <div class="flex gap-2 mb-20">
+                <input id="chat-input" type="text" placeholder="Пиши по-английски..." class="flex-1 bg-gray-900 border border-gray-800 rounded-2xl p-4 text-white outline-none focus:border-blue-500">
+                <button onclick="sendMsg()" class="bg-blue-600 p-4 rounded-2xl font-bold">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
             </div>
         </main>
 
-        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass border-t border-white/10 rounded-t-3xl p-4 flex justify-around">
-            <button onclick="switchTab('tab-lessons')" class="flex flex-col items-center focus:text-orange-500">
-                <span class="text-xl">📚</span>
-                <span class="text-[10px] uppercase mt-1">Уроки</span>
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-black/80 backdrop-blur-md border-t border-gray-900 p-4 flex justify-around rounded-t-[35px]">
+            <button onclick="switchTab('tab-learn')" class="flex flex-col items-center">
+                <span class="text-xl">🧩</span>
+                <span class="text-[9px] uppercase font-bold text-gray-500 mt-1">Квиз</span>
             </button>
-            <button onclick="switchTab('tab-chat')" class="flex flex-col items-center focus:text-orange-500">
+            <button onclick="switchTab('tab-cards')" class="flex flex-col items-center">
+                <span class="text-xl">🎴</span>
+                <span class="text-[9px] uppercase font-bold text-gray-500 mt-1">Карты</span>
+            </button>
+            <button onclick="switchTab('tab-chat')" class="flex flex-col items-center">
                 <span class="text-xl">🤖</span>
-                <span class="text-[10px] uppercase mt-1">Чат</span>
+                <span class="text-[9px] uppercase font-bold text-gray-500 mt-1">Чат</span>
             </button>
         </nav>
     </div>
 
     <script>
-        let xp = parseInt(localStorage.getItem('simplex_xp')) || 0;
-        let level = Math.floor(xp / 100) + 1;
+        let xp = parseInt(localStorage.getItem('sx_xp')) || 0;
+        const token = "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";
+        
+        // КАРТОЧКИ
+        const deck = [
+            {en: "Curious", ru: "Любопытный", ex: "He is a curious student."},
+            {en: "Improve", ru: "Улучшать", ex: "I want to improve my English."},
+            {en: "Decision", ru: "Решение", ex: "It was a very difficult decision."}
+        ];
+        let cardIdx = 0;
 
-        function updateStats() {
-            const currentXpInLevel = xp % 100;
-            document.getElementById('user-xp').innerText = `${currentXpInLevel} / 100 XP`;
-            document.getElementById('user-level').innerText = `Уровень ${level}`;
-            document.getElementById('xp-bar').style.width = `${currentXpInLevel}%`;
-            localStorage.setItem('simplex_xp', xp);
+        function nextCard(type) {
+            if(type === 'easy') xp += 15;
+            cardIdx = (cardIdx + 1) % deck.length;
+            const card = document.getElementById('flashcard');
+            card.classList.remove('flipped');
+            setTimeout(() => {
+                card.querySelector('.card-face:not(.card-back)').innerText = deck[cardIdx].en;
+                card.querySelector('.card-back').innerHTML = `<span class="text-2xl font-bold">${deck[cardIdx].ru}</span><p class="text-sm text-blue-200 mt-4 italic">"${deck[cardIdx].ex}"</p>`;
+                updateUI();
+            }, 300);
         }
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
+        // КОНСТРУКТОР
+        const tasks = [{ru: "Я учу английский", en: ["I", "learn", "English"]}];
+        let userWords = [];
+
+        function initBuild() {
+            const task = tasks[0];
+            document.getElementById('task-text').innerText = task.ru;
+            const bank = document.getElementById('word-bank');
+            bank.innerHTML = task.en.sort(() => Math.random()-0.5).map(w => `<button onclick="pick('${w}', this)" class="bg-gray-800 px-4 py-2 rounded-xl border border-gray-700 font-medium">${w}</button>`).join('');
+            document.getElementById('build-zone').innerHTML = '';
+            userWords = [];
         }
 
-        async function handleSend() {
+        function pick(w, btn) {
+            userWords.push(w);
+            btn.style.display = 'none';
+            document.getElementById('build-zone').innerHTML += `<span class="bg-blue-600 px-3 py-1 rounded-lg m-1">${w}</span>`;
+        }
+
+        function checkBuild() {
+            if(userWords.join(' ') === tasks[0].en.join(' ')) {
+                alert("Правильно! +20 XP");
+                xp += 20;
+                initBuild();
+            } else {
+                alert("Попробуй еще раз");
+                initBuild();
+            }
+            updateUI();
+        }
+
+        // ЧАТ С ИИ (Llama-3)
+        async function sendMsg() {
             const input = document.getElementById('chat-input');
-            const chatWin = document.getElementById('chat-window');
-            const userText = input.value.trim();
-            const token = "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";
-            
-            if (!userText) return;
+            const box = document.getElementById('chat-box');
+            const val = input.value;
+            if(!val) return;
 
-            // Сообщение пользователя
-            chatWin.innerHTML += `<div class="bg-orange-600 p-3 rounded-2xl rounded-tr-none max-w-[85%] self-end ml-auto shadow-md">${userText}</div>`;
+            box.innerHTML += `<div class="bg-blue-600 p-4 rounded-2xl rounded-tr-none max-w-[90%] ml-auto text-sm shadow-lg">${val}</div>`;
             input.value = '';
-            chatWin.scrollTop = chatWin.scrollHeight;
+            box.scrollTop = box.scrollHeight;
 
-            // Начисляем XP
-            xp += 20;
-            level = Math.floor(xp / 100) + 1;
-            updateStats();
-
-            // Индикатор загрузки
-            const typingId = "typing-" + Date.now();
-            chatWin.innerHTML += `<div id="${typingId}" class="glass p-3 rounded-2xl rounded-tl-none max-w-[85%] animate-pulse text-slate-400 italic">Thinking...</div>`;
-            chatWin.scrollTop = chatWin.scrollHeight;
+            const tempId = "t-"+Date.now();
+            box.innerHTML += `<div id="${tempId}" class="glass-card p-4 rounded-tl-none max-w-[90%] text-sm italic text-gray-500 animate-pulse">Учитель думает...</div>`;
 
             try {
-                const response = await fetch("https://api-inference.huggingface.co/models/Mistralai/Mistral-7B-Instruct-v0.2", {
+                const res = await fetch("https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct", {
                     headers: { Authorization: `Bearer ${token}` },
                     method: "POST",
                     body: JSON.stringify({ 
-                        inputs: `<s>[INST] You are a friendly English teacher in the app SimpleX. Reply briefly to this student: "${userText}" [/INST]`,
-                        parameters: { max_new_tokens: 100 }
+                        inputs: `<|begin_of_text|><|start_header_id|>system<|end_header_id|>You are a friendly English teacher for a Russian student. If the student makes a mistake, correct it. Explain in Russian if necessary, but keep the conversation in English.<|eot_id|><|start_header_id|>user<|end_header_id|>${val}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
+                        parameters: { max_new_tokens: 150, stop: ["<|eot_id|>"] }
                     }),
                 });
-                
-                const data = await response.json();
-                document.getElementById(typingId).remove();
-                
-                let rawOutput = data[0].generated_text;
-                let aiText = rawOutput.split('[/INST]').pop().trim();
-
-                chatWin.innerHTML += `<div class="glass p-3 rounded-2xl rounded-tl-none max-w-[85%] border border-slate-700">${aiText}</div>`;
-            } catch (error) {
-                document.getElementById(typingId).innerHTML = "I'm a bit tired today. But your XP is safe! Let's try again?";
+                const data = await res.json();
+                document.getElementById(tempId).remove();
+                let reply = data[0].generated_text.split('assistant').pop().trim();
+                box.innerHTML += `<div class="glass-card p-4 rounded-tl-none max-w-[90%] text-sm border-l-4 border-blue-500 shadow-xl">${reply}</div>`;
+                xp += 10;
+                updateUI();
+            } catch(e) {
+                document.getElementById(tempId).innerText = "Ошибка связи. Проверь токен!";
             }
-            
-            chatWin.scrollTop = chatWin.scrollHeight;
+            box.scrollTop = box.scrollHeight;
         }
 
-        updateStats();
+        function updateUI() {
+            document.getElementById('xp-counter').innerText = `${xp} XP`;
+            document.getElementById('lvl-info').innerText = `Level ${Math.floor(xp/100)+1} • Beginner`;
+            localStorage.setItem('sx_xp', xp);
+        }
+
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        initBuild();
+        updateUI();
     </script>
 </body>
 </html>
