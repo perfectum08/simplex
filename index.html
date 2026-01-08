@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleX - Learn English</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: white; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .progress-orange { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .tab-content { display: none; }
+        .active { display: block; }
+    </style>
+</head>
+<body class="font-sans">
+
+    <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col">
+        
+        <header class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-2xl font-black tracking-tighter text-orange-500">SimpleX</h1>
+                <div class="text-right">
+                    <p id="user-level" class="text-xs uppercase font-bold text-slate-400">Уровень 1</p>
+                    <p id="user-xp" class="text-sm font-mono">0 / 100 XP</p>
+                </div>
+            </div>
+            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                <div id="xp-bar" class="progress-orange h-full" style="width: 0%"></div>
+            </div>
+        </header>
+
+        <main id="tab-lessons" class="tab-content active px-6">
+            <h2 class="text-xl font-bold mb-4">Твои уроки</h2>
+            <div class="space-y-4">
+                <div class="glass p-5 rounded-2xl flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold">First Steps</h3>
+                        <p class="text-xs text-slate-400">Базовые фразы и приветствия</p>
+                    </div>
+                    <button class="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-xl text-sm font-bold">Начать</button>
+                </div>
+                <div class="glass p-5 rounded-2xl flex justify-between items-center opacity-50">
+                    <div>
+                        <h3 class="font-bold">Daily Life</h3>
+                        <p class="text-xs text-slate-400">Заблокировано (нужен Lvl 2)</p>
+                    </div>
+                    <span class="text-xl">🔒</span>
+                </div>
+            </div>
+        </main>
+
+        <main id="tab-chat" class="tab-content px-6 flex-1 flex flex-col">
+            <div id="chat-window" class="flex-1 overflow-y-auto space-y-4 mb-4 pr-2 text-sm">
+                <div class="glass p-3 rounded-2xl rounded-tl-none max-w-[85%]">
+                    Hi! I'm your SimpleX tutor. Write something in English to earn XP! 🚀
+                </div>
+            </div>
+            <div class="flex gap-2 mb-20">
+                <input id="chat-input" type="text" placeholder="Type here..." class="flex-1 bg-slate-800 border-none rounded-xl p-4 text-white outline-none focus:ring-2 focus:ring-orange-500">
+                <button onclick="handleSend()" class="bg-orange-500 p-4 rounded-xl font-bold">></button>
+            </div>
+        </main>
+
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass border-t-0 rounded-t-3xl p-4 flex justify-around">
+            <button onclick="switchTab('tab-lessons')" class="flex flex-col items-center">
+                <span class="text-xl">📚</span>
+                <span class="text-[10px] uppercase mt-1">Уроки</span>
+            </button>
+            <button onclick="switchTab('tab-chat')" class="flex flex-col items-center">
+                <span class="text-xl">🤖</span>
+                <span class="text-[10px] uppercase mt-1">ИИ Чат</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        // ЛОГИКА ПРОГРЕССА
+        let xp = parseInt(localStorage.getItem('simplex_xp')) || 0;
+        let level = Math.floor(xp / 100) + 1;
+
+        function updateStats() {
+            const currentXpInLevel = xp % 100;
+            document.getElementById('user-xp').innerText = `${currentXpInLevel} / 100 XP`;
+            document.getElementById('user-level').innerText = `Уровень ${level}`;
+            document.getElementById('xp-bar').style.width = `${currentXpInLevel}%`;
+            localStorage.setItem('simplex_xp', xp);
+        }
+
+        // ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // РАБОТА ЧАТА
+        function handleSend() {
+            const input = document.getElementById('chat-input');
+            const chatWin = document.getElementById('chat-window');
+            if (!input.value) return;
+
+            // Добавляем сообщение юзера
+            chatWin.innerHTML += `<div class="bg-orange-500 p-3 rounded-2xl rounded-tr-none max-w-[85%] self-end ml-auto">${input.value}</div>`;
+            
+            // Начисляем XP
+            xp += 20;
+            level = Math.floor(xp / 100) + 1;
+            updateStats();
+
+            // Ответ (заглушка)
+            setTimeout(() => {
+                chatWin.innerHTML += `<div class="glass p-3 rounded-2xl rounded-tl-none max-w-[85%]">Good job! +20 XP earned. Keep going!</div>`;
+                chatWin.scrollTop = chatWin.scrollHeight;
+            }, 600);
+
+            input.value = '';
+            chatWin.scrollTop = chatWin.scrollHeight;
+        }
+
+        updateStats(); // Инициализация при запуске
+    </script>
+</body>
+</html>
